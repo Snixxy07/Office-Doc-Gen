@@ -56,6 +56,24 @@ function initializeEventListeners() {
     event.preventDefault();
     tryCatch(saveFormData);
   };
+
+  const contractNumberInput = document.getElementById("contractNumber");
+  contractNumberInput.value = loadLastContractNumber();
+  contractNumberInput.oninput = (event) => {
+    handleContractNumberChange(event);
+  };
+}
+
+function loadLastContractNumber() {
+  return localStorage.getItem("lastContractNumber") || "";
+}
+
+function handleContractNumberChange(event) {
+  saveContractNumber(event.target.value);
+}
+
+function saveContractNumber(value) {
+  localStorage.setItem("lastContractNumber", value);
 }
 
 // UI Functions
@@ -187,7 +205,7 @@ async function replaceData() {
 async function replaceFopData(selectedFop) {
   await replaceText(defaultFop.fop, selectedFop.fop);
   await replaceText(defaultFop.inn, selectedFop.inn);
-  await replaceText(proceedSex(defaultFop.sex), proceedSex(selectedFop.sex));
+  await replaceText(proceedSex(defaultFop.sex), proceedSex(selectedFop.sex), true);
   await replaceText(defaultFop.registrationDate, selectedFop.registrationDate);
   await replaceText(defaultFop.registrationNumber, selectedFop.registrationNumber);
   await replaceText(defaultFop.address, selectedFop.address);
