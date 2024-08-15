@@ -49,10 +49,7 @@ label {
   color: #555;
 }
 
-input[type="text"],
-input[type="file"],
-input[type="date"],
-input[type="number"],
+input,
 textarea,
 select {
   width: 100%;
