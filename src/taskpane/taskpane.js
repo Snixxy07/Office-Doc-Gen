@@ -27,6 +27,8 @@ const defaultFop = {
   bankAbbreviation: "ПАТ",
 };
 
+const appId = "-fafvhitsjq-uc.a.run.app";
+
 // Initialize the Office Add-in
 Office.onReady((info) => {
   if (info.host === Office.HostType.Word) {
@@ -58,14 +60,30 @@ function initializeEventListeners() {
   };
 
   const contractNumberInput = document.getElementById("contractNumber");
-  contractNumberInput.value = loadLastContractNumber();
-  contractNumberInput.oninput = (event) => {
+  loadLastContractNumber().then((lastNumber) => {
+    contractNumberInput.value = lastNumber;
+  });
+  contractNumberInput.onblur = (event) => {
     handleContractNumberChange(event);
   };
 }
 
-function loadLastContractNumber() {
-  return localStorage.getItem("lastContractNumber") || "";
+async function loadLastContractNumber() {
+  try {
+    const localLastNum = localStorage.getItem("lastContractNumber") || "";
+    const response = await fetch(`https://getcontractnumber${appId}`);
+    const data = await response.json();
+
+    if (data.lastNumber) {
+      localStorage.setItem("lastContractNumber", data.lastNumber);
+      return data.lastNumber;
+    }
+
+    return localLastNum;
+  } catch (error) {
+    console.error("Error fetching last contract number:", error);
+    return localStorage.getItem("lastContractNumber") || "";
+  }
 }
 
 function handleContractNumberChange(event) {
@@ -73,6 +91,7 @@ function handleContractNumberChange(event) {
 }
 
 function saveContractNumber(value) {
+  fetch(`https://updatecontractnumber${appId}?number=${value}`).then((response) => console.log(response.status));
   localStorage.setItem("lastContractNumber", value);
 }
 
