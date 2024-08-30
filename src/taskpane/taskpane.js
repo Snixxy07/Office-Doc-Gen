@@ -33,7 +33,7 @@ const appId = "-fafvhitsjq-uc.a.run.app";
 Office.onReady((info) => {
   if (info.host === Office.HostType.Word) {
     initializeEventListeners();
-    populateOurFopSelect();
+    populateOurFopSelect().catch((error) => console.error("Error populating FOP select:", error));
   }
 });
 
@@ -66,6 +66,17 @@ function initializeEventListeners() {
   contractNumberInput.onblur = (event) => {
     handleContractNumberChange(event);
   };
+
+  const ourFopSelect = document.getElementById("ourFop");
+  const fopToReplaceSelect = document.getElementById("replaceFop");
+
+  ourFopSelect.addEventListener("change", (event) => {
+    localStorage.setItem("lastSelectedOurFop", event.target.value);
+  });
+
+  fopToReplaceSelect.addEventListener("change", (event) => {
+    localStorage.setItem("lastSelectedReplaceFop", event.target.value);
+  });
 }
 
 async function loadLastContractNumber() {
@@ -137,7 +148,7 @@ function validateFormData(formData) {
   return true;
 }
 
-function saveFormData() {
+/* function saveFormData() {
   const formData = {
     fop: document.getElementById("fop").value,
     sex: document.getElementById("sex").value,
@@ -166,71 +177,176 @@ function saveFormData() {
     closeAddFopForm();
     populateOurFopSelect();
   }
+} */
+
+async function saveFormData() {
+  const formData = {
+    fop: document.getElementById("fop").value,
+    sex: document.getElementById("sex").value,
+    inn: document.getElementById("inn").value,
+    registrationDate: document.getElementById("registrationDate").value,
+    registrationNumber: document.getElementById("registrationNumber").value,
+    address: document.getElementById("address").value,
+    accountNumber: document.getElementById("accountNumber").value,
+    bank: document.getElementById("bank").value,
+    bankAbbreviation: document.getElementById("bankAbbreviation").value,
+  };
+
+  if (validateFormData(formData)) {
+    try {
+      const response = await fetch(`https://storeFopData${appId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log("FOP data saved to server:", result.message);
+        document.getElementById("addFopForm").reset();
+        closeAddFopForm();
+        populateOurFopSelect();
+      } else if (response.status === 409) {
+        console.warn("FOP with this INN already exists:", result.message);
+        // Handle the case where the FOP already exists (e.g., show a message to the user)
+      } else {
+        console.error("Failed to save FOP data to server:", result.message);
+      }
+    } catch (error) {
+      console.error("Error saving FOP data:", error);
+    }
+  }
 }
 
 // FOP Data Handling Functions
-function getAllFops() {
+/* function getAllFops() {
   const fopDataArray = JSON.parse(localStorage.getItem("fopDataArray")) || [];
   return fopDataArray.reduce((acc, fop) => {
     acc[fop.inn] = fop;
     return acc;
   }, {});
+} */
+
+async function getAllFops() {
+  try {
+    const response = await fetch(`https://getAllFops${appId}`);
+    const data = await response.json();
+
+    if (response.ok) {
+      const fops = {};
+      data.fops.forEach((fop) => {
+        fops[fop.inn] = fop;
+      });
+      return fops;
+    } else {
+      console.error("Failed to fetch FOPs:", data.message);
+      return {};
+    }
+  } catch (error) {
+    console.error("Error fetching FOPs:", error);
+    return {};
+  }
 }
 
-function populateOurFopSelect() {
-  const fops = getAllFops();
-  const select = document.getElementById("ourFop");
-  select.innerHTML = ""; // Remove the default option
+async function populateOurFopSelect() {
+  const fops = await getAllFops();
+  const ourFopSelect = document.getElementById("ourFop");
+  const fopToReplaceSelect = document.getElementById("replaceFop");
+  ourFopSelect.innerHTML = "";
+  fopToReplaceSelect.innerHTML = "";
+
+  // Get last selected values from local storage
+  const lastSelectedOurFop = localStorage.getItem("lastSelectedOurFop");
+  const lastSelectedReplaceFop = localStorage.getItem("lastSelectedReplaceFop");
 
   let isFirstOption = true;
   for (const inn in fops) {
-    const option = document.createElement("option");
-    option.value = inn;
-    option.textContent = fops[inn].fop;
+    const ourFopOption = document.createElement("option");
+    const fopToReplaceOption = document.createElement("option");
 
-    if (isFirstOption) {
-      option.selected = true;
+    ourFopOption.value = inn;
+    ourFopOption.textContent = fops[inn].fop;
+    fopToReplaceOption.value = inn;
+    fopToReplaceOption.textContent = fops[inn].fop;
+
+    // Set selected option based on last selected values
+    if (inn === lastSelectedOurFop) {
+      ourFopOption.selected = true;
+      isFirstOption = false;
+    }
+    if (inn === lastSelectedReplaceFop) {
+      fopToReplaceOption.selected = true;
       isFirstOption = false;
     }
 
-    select.appendChild(option);
+    // If no saved selection, select the first option
+    if (isFirstOption) {
+      ourFopOption.selected = true;
+      fopToReplaceOption.selected = true;
+      isFirstOption = false;
+    }
+
+    ourFopSelect.appendChild(ourFopOption);
+    fopToReplaceSelect.appendChild(fopToReplaceOption);
   }
 
-  // If no FOPs were loaded, add a default option
-  if (select.options.length === 0) {
-    const defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = "Наш ФОП";
-    select.appendChild(defaultOption);
+  // Add event listeners to save selected values
+  ourFopSelect.addEventListener("change", (event) => {
+    localStorage.setItem("lastSelectedOurFop", event.target.value);
+  });
+
+  fopToReplaceSelect.addEventListener("change", (event) => {
+    localStorage.setItem("lastSelectedReplaceFop", event.target.value);
+  });
+
+  if (ourFopSelect.options.length === 0) {
+    const defaultOption1 = document.createElement("option");
+    const defaultOption2 = document.createElement("option");
+    defaultOption1.value = "";
+    defaultOption1.textContent = "Наш ФОП";
+    defaultOption2.value = "";
+    defaultOption2.textContent = "Наш ФОП";
+    ourFopSelect.appendChild(defaultOption1);
+    fopToReplaceSelect.appendChild(defaultOption2);
   }
 }
 
 // Data Replacement Functions
 async function replaceData() {
   const selectedFopInn = document.getElementById("ourFop").value;
+  const fopToReplaceInn = document.getElementById("replaceFop").value;
   const contractNumber = document.getElementById("contractNumber").value;
   const contractDate = document.getElementById("contractDate").value;
   const contractEndDate = document.getElementById("contractEndDate").value;
 
-  const fops = getAllFops();
-  const selectedFop = fops[selectedFopInn] || defaultFop;
+  const fops = await getAllFops();
+  const selectedFop = fops[selectedFopInn];
+  const fopToReplace = fops[fopToReplaceInn];
 
-  await replaceFopData(selectedFop);
+  if (!selectedFop || !fopToReplace) {
+    console.error("Selected FOP or FOP to replace not found");
+    return;
+  }
+
+  await replaceFopData(selectedFop, fopToReplace);
   await replaceContractData(contractNumber, contractDate, contractEndDate);
 
   console.log("Data replacement completed.");
 }
 
-async function replaceFopData(selectedFop) {
-  await replaceText(defaultFop.fop, selectedFop.fop);
-  await replaceText(defaultFop.inn, selectedFop.inn);
-  await replaceText(proceedSex(defaultFop.sex), proceedSex(selectedFop.sex), true);
-  await replaceText(defaultFop.registrationDate, selectedFop.registrationDate);
-  await replaceText(defaultFop.registrationNumber, selectedFop.registrationNumber);
-  await replaceText(defaultFop.address, selectedFop.address);
-  await replaceText(defaultFop.accountNumber, selectedFop.accountNumber);
+async function replaceFopData(selectedFop, fopToReplace) {
+  await replaceText(fopToReplace.fop, selectedFop.fop);
+  await replaceText(fopToReplace.inn, selectedFop.inn);
+  await replaceText(proceedSex(fopToReplace.sex), proceedSex(selectedFop.sex), true);
+  await replaceText(fopToReplace.registrationDate, selectedFop.registrationDate);
+  await replaceText(fopToReplace.registrationNumber, selectedFop.registrationNumber);
+  await replaceText(fopToReplace.address, selectedFop.address);
+  await replaceText(fopToReplace.accountNumber, selectedFop.accountNumber);
   await replaceText(
-    formatBankName(defaultFop.bank, defaultFop.bankAbbreviation),
+    formatBankName(fopToReplace.bank, fopToReplace.bankAbbreviation),
     formatBankName(selectedFop.bank, selectedFop.bankAbbreviation)
   );
 }
