@@ -27,6 +27,26 @@ const defaultFop = {
   bankAbbreviation: "ПАТ",
 };
 
+const partsToReplace = [
+  { searchText: " або із залученням уповноважених ними Кур’єрів", replacementText: "" },
+  {
+    searchText: "зареєстрована у Додатку  особа, яка самостійно та на власний ризик займається доставкою",
+    replacementText: "особа, яка за дорученням Принципала здійснює доставку",
+  },
+  {
+    searchText:
+      "Товарів між Принципалом та Користувачем, прийняття оплати за Товари, замовлені Користувачами у Принципалів, організації доставки",
+    replacementText:
+      "Товарів між Принципалом та Користувачем з доставкою Товарів Кур'єрами, прийняття оплати за Товари, замовлені Користувачами у Принципалів, та оплати за доставку Кур'єрами",
+  },
+  {
+    searchText:
+      "які Принципал пропонує Користувачам через Додаток. Для отримання зазначених платежів Агент використовує мережу Інтернет та укладає договори з фінансовими компаніями",
+    replacementText:
+      "які Принципал пропонує Користувачам через Додаток, та за послуги з доставки таких Товарів Кур'єрами. Для отримання зазначених платежів Агент використовує мережу Інтернет та укладає договори з фінансовими установами",
+  },
+];
+
 const appId = "-fafvhitsjq-uc.a.run.app";
 
 // Initialize the Office Add-in
@@ -333,6 +353,7 @@ async function replaceData() {
 
   await replaceFopData(selectedFop, fopToReplace);
   await replaceContractData(contractNumber, contractDate, contractEndDate);
+  await replaceNeededParts(partsToReplace);
 
   console.log("Data replacement completed.");
 }
@@ -462,4 +483,12 @@ async function tryCatch(callback) {
   } catch (error) {
     console.error(error);
   }
+}
+
+async function replaceNeededParts(parts) {
+  await tryCatch(async () => {
+    for (const part of parts) {
+      await replaceText(part.searchText, part.replacementText);
+    }
+  });
 }
