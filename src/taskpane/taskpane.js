@@ -28,7 +28,7 @@ const defaultFop = {
 };
 
 const partsToReplace = [
-  { searchText: " або із залученням уповноважених ними Кур’єрів", replacementText: "" },
+  { searchText: "Додаток або із залученням уповноважених ними Кур’єрів", replacementText: "Додаток" },
   {
     searchText: "зареєстрована у Додатку  особа, яка самостійно та на власний ризик займається доставкою",
     replacementText: "особа, яка за дорученням Принципала здійснює доставку",
@@ -488,7 +488,7 @@ async function tryCatch(callback) {
 async function replaceNeededParts(parts) {
   await tryCatch(async () => {
     for (const part of parts) {
-      await replaceText(part.searchText, part.replacementText);
+      await replaceText(part.searchText, part.replacementText, true);
     }
   });
 }
