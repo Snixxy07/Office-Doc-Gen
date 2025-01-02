@@ -306,13 +306,13 @@ async function replaceFopData(selectedFop, fopToReplace) {
 
 async function replaceContractData(contractNumber, contractDate, contractEndDate) {
   if (contractNumber) {
-    await replaceTextRegex("([0-9]@)/24", contractNumber + "/24");
+    await replaceTextRegex("([0-9]@)/24", contractNumber + "/25");
   }
   if (contractDate) {
-    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) 2024", formatDateUkrainian(contractDate));
+    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) 2025", formatDateUkrainian(contractDate));
   }
   if (contractEndDate) {
-    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) 2025", formatDateUkrainian(contractEndDate));
+    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) 2026", formatDateUkrainian(contractEndDate));
   }
 }
 
