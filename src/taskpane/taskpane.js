@@ -305,14 +305,20 @@ async function replaceFopData(selectedFop, fopToReplace) {
 }
 
 async function replaceContractData(contractNumber, contractDate, contractEndDate) {
+  const year = new Date(contractDate).getFullYear();
+  const shortYear = year.toString().slice(-2);
+
   if (contractNumber) {
-    await replaceTextRegex("([0-9]@)/24", contractNumber + "/25");
+    const paddedContractNumber = contractNumber.length === 1 ? `0${contractNumber}` : contractNumber;
+    await replaceTextRegex("[0-9]@/[0-9][0-9]", `${paddedContractNumber}/${shortYear}`);
   }
   if (contractDate) {
-    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) 2025", formatDateUkrainian(contractDate));
+    const formattedContractDate = formatDateUkrainian(contractDate);
+    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) [0-9]{4}", formattedContractDate, 0);
+    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) [0-9]{4}", formattedContractDate, 2);
   }
   if (contractEndDate) {
-    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) 2026", formatDateUkrainian(contractEndDate));
+    await replaceTextRegex("«[0-9]{2}» ([!0-9]@) [0-9]{4}", formatDateUkrainian(contractEndDate), 1);
   }
 }
 
@@ -377,7 +383,7 @@ async function replaceText(searchText, replacementText, replaceFirstOnly = false
   });
 }
 
-async function replaceTextRegex(searchPattern, replacementText, replaceFirstOnly = false) {
+async function replaceTextRegex(searchPattern, replacementText, replaceIndex = null) {
   await Word.run(async (context) => {
     try {
       const doc = context.document.body;
@@ -386,16 +392,19 @@ async function replaceTextRegex(searchPattern, replacementText, replaceFirstOnly
       await context.sync();
 
       if (searchResults.items.length > 0) {
-        if (replaceFirstOnly) {
-          searchResults.items[0].insertText(replacementText, Word.InsertLocation.replace);
+        if (replaceIndex !== null && replaceIndex >= 0 && replaceIndex < searchResults.items.length) {
+          searchResults.items[replaceIndex].insertText(replacementText, Word.InsertLocation.replace);
+          console.log(
+            `Replaced occurrence at index ${replaceIndex} matching "${searchPattern}" with "${replacementText}"`
+          );
         } else {
           searchResults.items.forEach((result) => {
             result.insertText(replacementText, Word.InsertLocation.replace);
           });
+          console.log(
+            `Replaced ${searchResults.items.length} occurrences matching "${searchPattern}" with "${replacementText}"`
+          );
         }
-        console.log(
-          `Replaced ${replaceFirstOnly ? "first occurrence" : searchResults.items.length + " occurrences"} matching "${searchPattern}" with "${replacementText}"`
-        );
       } else {
         console.log(`No matches found for "${searchPattern}"`);
       }
