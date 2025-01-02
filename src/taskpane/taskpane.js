@@ -1,32 +1,3 @@
-/* eslint-disable no-undef */
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
-
-/* global document, Office, Word */
-
-/* eslint-disable no-undef */
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
-
-/* global document, Office, Word */
-
-// Default FOP data
-const defaultFop = {
-  fop: "Проценко Юрій Ігорович",
-  sex: "m",
-  inn: "3289205817",
-  registrationDate: "06.12.2023",
-  registrationNumber: "2005560000000181053",
-  address: "65025, Одеська обл., місто Одеса, пр. Добровольського, будинок 137, квартира 55",
-  accountNumber: "UA113071230000026004011398566",
-  bank: "БАНК ВОСТОК",
-  bankAbbreviation: "ПАТ",
-};
-
 const partsToReplace = [
   { searchText: "Додаток або із залученням уповноважених ними Кур’єрів", replacementText: "Додаток" },
   {
