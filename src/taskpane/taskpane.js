@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const partsToReplace = [
   { searchText: "Додаток або із залученням уповноважених ними Кур’єрів", replacementText: "Додаток" },
   {
