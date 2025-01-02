@@ -168,37 +168,6 @@ function validateFormData(formData) {
   return true;
 }
 
-/* function saveFormData() {
-  const formData = {
-    fop: document.getElementById("fop").value,
-    sex: document.getElementById("sex").value,
-    inn: document.getElementById("inn").value,
-    registrationDate: document.getElementById("registrationDate").value,
-    registrationNumber: document.getElementById("registrationNumber").value,
-    address: document.getElementById("address").value,
-    accountNumber: document.getElementById("accountNumber").value,
-    bank: document.getElementById("bank").value,
-    bankAbbreviation: document.getElementById("bankAbbreviation").value,
-  };
-
-  if (validateFormData(formData)) {
-    let fopDataArray = JSON.parse(localStorage.getItem("fopDataArray")) || [];
-    const existingIndex = fopDataArray.findIndex((item) => item.inn === formData.inn);
-
-    if (existingIndex !== -1) {
-      fopDataArray[existingIndex] = formData;
-    } else {
-      fopDataArray.push(formData);
-    }
-
-    localStorage.setItem("fopDataArray", JSON.stringify(fopDataArray));
-    console.log("Settings saved.");
-    document.getElementById("addFopForm").reset();
-    closeAddFopForm();
-    populateOurFopSelect();
-  }
-} */
-
 async function saveFormData() {
   const formData = {
     fop: document.getElementById("fop").value,
@@ -240,15 +209,6 @@ async function saveFormData() {
     }
   }
 }
-
-// FOP Data Handling Functions
-/* function getAllFops() {
-  const fopDataArray = JSON.parse(localStorage.getItem("fopDataArray")) || [];
-  return fopDataArray.reduce((acc, fop) => {
-    acc[fop.inn] = fop;
-    return acc;
-  }, {});
-} */
 
 async function getAllFops() {
   try {
