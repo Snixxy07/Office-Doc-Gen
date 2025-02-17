@@ -273,6 +273,7 @@ async function replaceData() {
   const contractNumber = document.getElementById("contractNumber").value;
   const contractDate = document.getElementById("contractDate").value;
   const contractEndDate = document.getElementById("contractEndDate").value;
+  const applyEditsCheckbox = document.getElementById("applyEdits").checked;
 
   const fops = await getAllFops();
   const selectedFop = fops[selectedFopInn];
@@ -285,7 +286,10 @@ async function replaceData() {
 
   await replaceFopData(selectedFop, fopToReplace);
   await replaceContractData(contractNumber, contractDate, contractEndDate);
-  await replaceNeededParts(partsToReplace);
+  if (applyEditsCheckbox) {
+    console.log("Applying additional edits...");
+    await replaceNeededParts(partsToReplace);
+  }
 
   console.log("Data replacement completed.");
 }

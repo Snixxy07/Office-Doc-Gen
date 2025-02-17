@@ -118,6 +118,14 @@ input[type="submit"]:active {
   margin-bottom: 1.25rem;
 }
 
+.inputBlock.checkbox input {
+  width: auto;
+}
+
+.inputBlock.checkbox label {
+  display: inline;
+}
+
 .fopBlock {
   display: flex;
   align-items: center;
